@@ -11,7 +11,7 @@ type commentBlockTest struct {
 }
 
 func (t *commentBlockTest) a_new_comment_block_for_file_with_comments_(filename, comment string) {
-	t.c = NewCommentBlock(filename, comment)
+	t.c = NewCommentBlock(filename, comment, 1, 10)
 }
 
 func (t *commentBlockTest) the_no_start_or_end_line_are_applied() {
@@ -39,16 +39,6 @@ func (t *commentBlockTest) has_end_line(expected int) *commentBlockTest {
 }
 
 func (t *commentBlockTest) and() *commentBlockTest {
-	return t
-}
-
-func (t *commentBlockTest) the_start_line_is_set_to_(lineNo int) *commentBlockTest {
-	t.c.WithStartLine(lineNo)
-	return t
-}
-
-func (t *commentBlockTest) the_end_line_is_set_to_(lineNo int) *commentBlockTest {
-	t.c.WithEndLine(lineNo)
 	return t
 }
 

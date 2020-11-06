@@ -11,28 +11,25 @@ import (
 	"strings"
 )
 
-type githubConnector struct {
-	client   *github.Client
-	owner    string
-	repo     string
-	prNumber int
-}
-
 type commenter struct {
-	connector *githubConnector
+	connector        *github.Client
+	owner            string
+	repo             string
+	prNumber         int
+	existingComments []*existingComment
+	files            []*CommitFileInfo
 }
 
-type CommitFileInfo struct {
-	fileName  string
-	hunkStart int
-	hunkEnd   int
-	sha       string
+type existingComment struct {
+	filename *string
+	comment  *string
 }
 
 var patchRegex *regexp.Regexp
 var commitRefRegex *regexp.Regexp
 
-func New(owner, repo, token string, prNumber int) (*commenter, error) {
+// NewCommenter creates a commenter for updating PR with comments
+func NewCommenter(token, owner, repo string, prNumber int) (*commenter, error) {
 	regex, err := regexp.Compile("^@@.*\\+(\\d+),(\\d+).+?@@")
 	if err != nil {
 		return nil, err
@@ -51,22 +48,26 @@ func New(owner, repo, token string, prNumber int) (*commenter, error) {
 
 	client := createClient(token)
 
-	return &commenter{
-		connector: &githubConnector{
-			client:   client,
-			owner:    owner,
-			repo:     repo,
-			prNumber: prNumber,
-		},
-	}, nil
-}
+	c := &commenter{
+		connector: client,
+		owner:     owner,
+		repo:      repo,
+		prNumber:  prNumber,
+	}
 
-func (gc *commenter) GetCommitFileInfo() ([]*CommitFileInfo, error) {
-	prFiles, err := gc.getFilesForPr()
+	err = c.loadPr()
 	if err != nil {
 		return nil, err
 	}
-	var commitFileInfos []*CommitFileInfo
+	return c, nil
+}
+
+// GetCommitFileInfo get file info for files in the commit
+func (gc *commenter) getCommitFileInfo() error {
+	prFiles, err := gc.getFilesForPr()
+	if err != nil {
+		return err
+	}
 	var errs []string
 	for _, file := range prFiles {
 		info, err := getCommitInfo(file)
@@ -74,27 +75,45 @@ func (gc *commenter) GetCommitFileInfo() ([]*CommitFileInfo, error) {
 			errs = append(errs, err.Error())
 			continue
 		}
-		commitFileInfos = append(commitFileInfos, info)
+		gc.files = append(gc.files, info)
 	}
 	if len(errs) > 0 {
-		return commitFileInfos, errors.New(fmt.Sprintf("there were errors processing the PR files.\n%s", strings.Join(errs, "\n")))
+		return errors.New(fmt.Sprintf("there were errors processing the PR files.\n%s", strings.Join(errs, "\n")))
 	}
-	return commitFileInfos, nil
+	return nil
 }
 
-func createClient(token string) *github.Client {
+func (gc *commenter) WriteComment(block *CommentBlock) error {
+	connector := gc.connector
 	ctx := context.Background()
-	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
-	tc := oauth2.NewClient(ctx, ts)
 
-	return github.NewClient(tc)
+	var _, _, err = connector.PullRequests.CreateComment(ctx, gc.owner, gc.repo, gc.prNumber, buildComment(block))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func buildComment(block *CommentBlock) *github.PullRequestComment {
+	comment := &github.PullRequestComment{
+		Line:     &block.StartLine,
+		Path:     &block.CommitFileInfo.FileName,
+		CommitID: &block.CommitFileInfo.sha,
+		Body:     &block.Comment,
+		Position: block.CalculatePosition(),
+	}
+	if block.StartLine != block.EndLine {
+		comment.StartLine = &block.StartLine
+		comment.Line = &block.EndLine
+	}
+	return comment
 }
 
 func (gc *commenter) getFilesForPr() ([]*github.CommitFile, error) {
 	connector := gc.connector
-	ctx := context.Background()
 
-	files, _, err := connector.client.PullRequests.ListFiles(ctx, connector.owner, connector.repo, connector.prNumber, nil)
+	files, _, err := connector.PullRequests.ListFiles(context.Background(), gc.owner, gc.repo, gc.prNumber, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -107,19 +126,43 @@ func (gc *commenter) getFilesForPr() ([]*github.CommitFile, error) {
 	return commitFiles, nil
 }
 
-func (gc *commenter) getExistingComments() ([]string, error) {
+func (gc *commenter) getExistingComments() error {
 	connector := gc.connector
 	ctx := context.Background()
 
-	var bodies []string
-	comments, _, err := connector.client.PullRequests.ListComments(ctx, connector.owner, connector.repo, connector.prNumber, &github.PullRequestListCommentsOptions{})
+	comments, _, err := connector.PullRequests.ListComments(ctx, gc.owner, gc.repo, gc.prNumber, &github.PullRequestListCommentsOptions{})
 	if err != nil {
-		return nil, err
+		return err
 	}
 	for _, comment := range comments {
-		bodies = append(bodies, comment.GetBody())
+		gc.existingComments = append(gc.existingComments, &existingComment{
+			filename: comment.Path,
+			comment:  comment.Body,
+		})
 	}
-	return bodies, nil
+	return nil
+}
+
+func (gc *commenter) loadPr() error {
+	err := gc.getCommitFileInfo()
+	if err != nil {
+		return err
+	}
+
+	err = gc.getExistingComments()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func createClient(token string) *github.Client {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
+	tc := oauth2.NewClient(ctx, ts)
+
+	return github.NewClient(tc)
 }
 
 func getCommitInfo(file *github.CommitFile) (*CommitFileInfo, error) {
@@ -137,9 +180,20 @@ func getCommitInfo(file *github.CommitFile) (*CommitFileInfo, error) {
 	sha := shaGroups[0][1]
 
 	return &CommitFileInfo{
-		fileName:  *file.Filename,
+		FileName:  *file.Filename,
 		hunkStart: hunkStart,
-		hunkEnd:   hunkEnd,
+		hunkEnd:   hunkStart + (hunkEnd - 1),
 		sha:       sha,
 	}, nil
+}
+
+func (gc *commenter) CheckCommentRelevant(filename string, line int) bool {
+	for _, file := range gc.files {
+		if file.FileName == filename {
+			if line > file.hunkStart && line < file.hunkEnd {
+				return true
+			}
+		}
+	}
+	return false
 }
