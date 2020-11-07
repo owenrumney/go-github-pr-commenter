@@ -150,7 +150,7 @@ func (c *commenter) loadPr() error {
 func (c *commenter) checkCommentRelevant(filename string, line int) bool {
 	for _, file := range c.files {
 		if file.FileName == filename {
-			if line > file.hunkStart && line < file.hunkEnd {
+			if line >= file.hunkStart && line < file.hunkEnd {
 				return true
 			}
 		}
