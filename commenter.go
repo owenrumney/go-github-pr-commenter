@@ -149,15 +149,19 @@ func (c *commenter) loadPr() error {
 
 func (c *commenter) checkCommentRelevant(filename string, line int) bool {
 	for _, file := range c.files {
-		if file.FileName == filename {
-			if line >= file.hunkStart && line < file.hunkEnd {
-				return true
+		if relevant := func(file *CommitFileInfo) bool {
+			if file.FileName == filename {
+				if line >= file.hunkStart && line < file.hunkEnd {
+					return true
+				}
 			}
+			return false
+		}(file); relevant {
+			return true
 		}
 	}
 	return false
 }
-
 func (c *commenter) getFileInfo(file string, line int) (*CommitFileInfo, error) {
 	for _, info := range c.files {
 		if info.FileName == file {
