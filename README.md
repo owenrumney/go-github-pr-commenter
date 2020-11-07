@@ -22,25 +22,13 @@ The intention is to keep the interface as clean as possible; steps are
 The following errors can be handled - I hope these are self explanatory
 
 ```go
-type PrDoesNotExistError struct {
-	owner    string
-	repo     string
-	prNumber int
-}
+type PrDoesNotExistError
 
-type NotPartOfPrError struct {
-	filepath string
-}
+type NotPartOfPrError
 
-type CommentAlreadyWrittenError struct {
-	filepath string
-	comment  string
-}
+type CommentAlreadyWrittenError
 
-type CommentNotValidError struct {
-	filepath string
-	lineNo   int
-}
+type CommentNotValidError
 ```
 
 ### Basic Usage Example
