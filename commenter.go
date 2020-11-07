@@ -58,7 +58,7 @@ func (c *commenter) WriteMultiLineComment(file, comment string, startLine, endLi
 		}
 	}
 
-	if !c.checkCommentRelevant(file, startLine) {
+	if !c.checkCommentRelevant(file, endLine) {
 		return newCommentNotValidError(file, startLine)
 	}
 
