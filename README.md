@@ -1,5 +1,10 @@
 # go-github-pr-commenter
 
+[![Build Status](https://travis-ci.com/owenrumney/go-github-pr-commenter.svg?branch=main)](https://travis-ci.com/owenrumney/go-github-pr-commenter) 
+[![Go Report Card](https://goreportcard.com/badge/github.com/owenrumney/go-github-pr-commenter)](https://goreportcard.com/report/github.com/owenrumney/go-github-pr-commenter) 
+[![Github Release](https://img.shields.io/github/release/owenrumney/go-github-pr-commenter.svg)](https://github.com/owenrumney/go-github-pr-commenter/releases)
+[![GitHub All Releases](https://img.shields.io/github/downloads/owenrumney/go-github-pr-commenter/total)](https://github.com/owenrumney/go-github-pr-commenter/releases)
+
 ## What is it?
 
 A convenience libary that wraps the [go-github](https://github.com/google/go-github) library and allows you to quickly add comments to the lines of changes in a comment.
