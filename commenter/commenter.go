@@ -171,7 +171,7 @@ func (c *Commenter) getFileInfo(file string, line int) (*CommitFileInfo, error) 
 			}
 		}
 	}
-	return nil, newNotPartOfPrError(file)
+	return nil, errors.New("file not found, shouldn't have got to here")
 }
 
 func buildComment(file, comment string, line int, info CommitFileInfo) *github.PullRequestComment {

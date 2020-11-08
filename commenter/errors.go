@@ -2,10 +2,6 @@ package commenter
 
 import "fmt"
 
-type NotPartOfPrError struct {
-	filepath string
-}
-
 type CommentAlreadyWrittenError struct {
 	filepath string
 	comment  string
@@ -20,16 +16,6 @@ type PrDoesNotExistError struct {
 	owner    string
 	repo     string
 	prNumber int
-}
-
-func newNotPartOfPrError(filepath string) NotPartOfPrError {
-	return NotPartOfPrError{
-		filepath: filepath,
-	}
-}
-
-func (e NotPartOfPrError) Error() string {
-	return fmt.Sprintf("The file [%s] provided is not part of the PR", e.filepath)
 }
 
 func newCommentAlreadyWrittenError(filepath, comment string) CommentAlreadyWrittenError {

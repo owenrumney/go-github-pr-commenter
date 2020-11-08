@@ -1,0 +1,11 @@
+language: go
+go:
+- master
+env:
+  matrix:
+  - GO111MODULE=on
+  global:
+  - secure: LcoQjG0F9aI/duFMq4z7CXPZAeNj0+Kiu5Iht0CIZlEEEkxlCqqM/YdOlKUNeq1cgengiG3gD89HPMT1jtwto2Ay/YE9tHKwRNZUVCpd/xUhNa0OorO6YZgbn0ikWzQNz8lsfnUlzX2CEkB1BAvPUbVWaS79AvJ/VYVgRWYAUsjNYswnItJJ/7DtTGXRHasr+TxtXBIXYKGsWBHxA66IvCovRBudR9mxlAFQHc4TLdl01nOIJ66eJPV9F5R/GYLKdbTYx4vVUj/9C/st9Or4DwMNF4fnZBpXnE5v77YUXjfMYROko9+j7p5ijMpUxXjUwg4hOdJzPTaflujK6+OmtaSu5ZnkcGwqDsZyqLkjQOACY9fHVbdWKLmXfA2lVFgTpNYZXFgoeapv+ywTZL4isIip0IbmkhQB07hMJU4dq+P8mOzqXDTnPRwmkknNTVc6C8HnOCx8Bs02T4M6/raJUUAQoG7e1+vRjO52FHVJMjAOHOaV2rBhVHN4G6bJW/ZgyoAWOcVKv0cLYb3TChZbCRMsNE6OH63y8NqH0qwJa4LJukJ9ctXCu2sdzl2AwmkO2BsYpScacoXaO0mbxNIjqakmXjiYJfuYHkA6iDzuURS+quGN0KDfC2oyi6gFxGGXQV5qezFHv1IMU+f0VkdJrlmJ+CYWDnsS40ayEMWhKa4=
+script:
+- go vet ./...
+- go test -v ./...
