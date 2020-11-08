@@ -37,7 +37,7 @@ type CommentNotValidError
 package main
 
 import (
-    commenter "github.com/owenrumney/go-github-pr-commenter"
+    "github.com/owenrumney/go-github-pr-commenter/commenter"
     log "github.com/sirupsen/logrus"
     "os"
 )
