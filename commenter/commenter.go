@@ -9,10 +9,11 @@ import (
 	"strings"
 )
 
+// Commenter is the main commenter struct
 type Commenter struct {
 	pr               *connector
 	existingComments []*existingComment
-	files            []*CommitFileInfo
+	files            []*commitFileInfo
 	loaded           bool
 }
 
@@ -128,7 +129,7 @@ func (c *Commenter) getCommitFileInfo() error {
 		c.files = append(c.files, info)
 	}
 	if len(errs) > 0 {
-		return errors.New(fmt.Sprintf("there were errors processing the PR files.\n%s", strings.Join(errs, "\n")))
+		return fmt.Errorf("there were errors processing the PR files.\n%s", strings.Join(errs, "\n"))
 	}
 	return nil
 }
@@ -149,7 +150,7 @@ func (c *Commenter) loadPr() error {
 
 func (c *Commenter) checkCommentRelevant(filename string, line int) bool {
 	for _, file := range c.files {
-		if relevant := func(file *CommitFileInfo) bool {
+		if relevant := func(file *commitFileInfo) bool {
 			if file.FileName == filename {
 				if line >= file.hunkStart && line < file.hunkEnd {
 					return true
@@ -163,7 +164,7 @@ func (c *Commenter) checkCommentRelevant(filename string, line int) bool {
 	return false
 }
 
-func (c *Commenter) getFileInfo(file string, line int) (*CommitFileInfo, error) {
+func (c *Commenter) getFileInfo(file string, line int) (*commitFileInfo, error) {
 	for _, info := range c.files {
 		if info.FileName == file {
 			if line > info.hunkStart && line < info.hunkEnd {
@@ -174,17 +175,17 @@ func (c *Commenter) getFileInfo(file string, line int) (*CommitFileInfo, error) 
 	return nil, errors.New("file not found, shouldn't have got to here")
 }
 
-func buildComment(file, comment string, line int, info CommitFileInfo) *github.PullRequestComment {
+func buildComment(file, comment string, line int, info commitFileInfo) *github.PullRequestComment {
 	return &github.PullRequestComment{
 		Line:     &line,
 		Path:     &file,
 		CommitID: &info.sha,
 		Body:     &comment,
-		Position: info.CalculatePosition(line),
+		Position: info.calculatePosition(line),
 	}
 }
 
-func getCommitInfo(file *github.CommitFile) (*CommitFileInfo, error) {
+func getCommitInfo(file *github.CommitFile) (*commitFileInfo, error) {
 	groups := patchRegex.FindAllStringSubmatch(file.GetPatch(), -1)
 	if len(groups) < 1 {
 		return nil, errors.New("the patch details could not be resolved")
@@ -198,7 +199,7 @@ func getCommitInfo(file *github.CommitFile) (*CommitFileInfo, error) {
 	}
 	sha := shaGroups[0][1]
 
-	return &CommitFileInfo{
+	return &commitFileInfo{
 		FileName:  *file.Filename,
 		hunkStart: hunkStart,
 		hunkEnd:   hunkStart + (hunkEnd - 1),
