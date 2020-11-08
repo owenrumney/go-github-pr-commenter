@@ -1,6 +1,7 @@
 # go-github-pr-commenter
 
 [![Build Status](https://travis-ci.com/owenrumney/go-github-pr-commenter.svg?branch=main)](https://travis-ci.com/owenrumney/go-github-pr-commenter) 
+[![codecov](https://codecov.io/gh/owenrumney/go-github-pr-commenter/branch/main/graph/badge.svg?token=2EH55OCCX7)](https://codecov.io/gh/owenrumney/go-github-pr-commenter)
 [![Go Report Card](https://goreportcard.com/badge/github.com/owenrumney/go-github-pr-commenter)](https://goreportcard.com/report/github.com/owenrumney/go-github-pr-commenter) 
 [![Github Release](https://img.shields.io/github/release/owenrumney/go-github-pr-commenter.svg)](https://github.com/owenrumney/go-github-pr-commenter/releases)
 [![GitHub All Releases](https://img.shields.io/github/downloads/owenrumney/go-github-pr-commenter/total)](https://github.com/owenrumney/go-github-pr-commenter/releases)
