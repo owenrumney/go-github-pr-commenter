@@ -1,4 +1,4 @@
-# go-github-pr-commenter
+# Github PR Commenter
 
 [![Build Status](https://travis-ci.com/owenrumney/go-github-pr-commenter.svg?branch=main)](https://travis-ci.com/owenrumney/go-github-pr-commenter) 
 [![codecov](https://codecov.io/gh/owenrumney/go-github-pr-commenter/branch/main/graph/badge.svg?token=2EH55OCCX7)](https://codecov.io/gh/owenrumney/go-github-pr-commenter)
