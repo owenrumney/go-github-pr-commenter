@@ -21,6 +21,10 @@ func TestMain(m *testing.M) {
 func setup() {
 	// clear down all the comments, disgusting
 	token := os.Getenv("GITHUB_TOKEN")
+	if len(token) == 0 {
+		fmt.Println("Failed to find the GIHTUB_TOKEN on the environment, stopping")
+		os.Exit(-1)
+	}
 	ctx := context.Background()
 	ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 	tc := oauth2.NewClient(ctx, ts)
