@@ -22,7 +22,7 @@ var commitRefRegex *regexp.Regexp
 
 // NewCommenter creates a Commenter for updating PR with comments
 func NewCommenter(token, owner, repo string, prNumber int) (*Commenter, error) {
-	regex, err := regexp.Compile("^@@.*\\+(\\d+),(\\d+).+?@@")
+	regex, err := regexp.Compile(`^@@.*\+(\d+),(\d+).+?@@`)
 	if err != nil {
 		return nil, err
 	}

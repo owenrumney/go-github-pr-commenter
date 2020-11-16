@@ -41,11 +41,6 @@ func (ct *commenterTest) inRepo(repo string) *commenterTest {
 	return ct
 }
 
-func (ct *commenterTest) usingToken(token string) *commenterTest {
-	ct.token = token
-	return ct
-}
-
 func (ct *commenterTest) usingTokenFromEnvironment() *commenterTest {
 	ct.token = os.Getenv("GITHUB_TOKEN")
 	return ct
