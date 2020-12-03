@@ -27,7 +27,7 @@ The intention is to keep the interface as clean as possible; steps are
 
 The following errors can be handled - I hope these are self explanatory
 
-```go
+```
 type PrDoesNotExistError
 
 type NotPartOfPrError
