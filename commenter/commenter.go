@@ -167,7 +167,7 @@ func (c *Commenter) checkCommentRelevant(filename string, line int) bool {
 func (c *Commenter) getFileInfo(file string, line int) (*commitFileInfo, error) {
 	for _, info := range c.files {
 		if info.FileName == file {
-			if line > info.hunkStart && line < info.hunkEnd {
+			if line >= info.hunkStart && line < info.hunkEnd {
 				return info, nil
 			}
 		}
