@@ -3,10 +3,11 @@ package commenter
 import (
 	"errors"
 	"fmt"
-	"github.com/google/go-github/v32/github"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/google/go-github/v32/github"
 )
 
 // Commenter is the main commenter struct
@@ -152,7 +153,7 @@ func (c *Commenter) checkCommentRelevant(filename string, line int) bool {
 	for _, file := range c.files {
 		if relevant := func(file *commitFileInfo) bool {
 			if file.FileName == filename {
-				if line >= file.hunkStart && line < file.hunkEnd {
+				if line >= file.hunkStart && line <= file.hunkEnd {
 					return true
 				}
 			}
