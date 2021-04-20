@@ -99,6 +99,20 @@ func (c *Commenter) WriteLineComment(file, comment string, line int) error {
 	return c.writeCommentIfRequired(prComment)
 }
 
+func (c *Commenter) WriteGeneralComment(comment string) error {
+	if !c.loaded {
+		err := c.loadPr()
+		if err != nil {
+			return err
+		}
+	}
+
+	issueComment := &github.IssueComment{
+		Body: &comment,
+	}
+	return c.pr.writeGeneralComment(issueComment)
+}
+
 func (c *Commenter) writeCommentIfRequired(prComment *github.PullRequestComment) error {
 	for _, existing := range c.existingComments {
 		err := func(ec *existingComment) error {

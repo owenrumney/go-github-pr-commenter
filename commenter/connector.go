@@ -2,12 +2,14 @@ package commenter
 
 import (
 	"context"
+
 	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
 )
 
 type connector struct {
 	prs      *github.PullRequestsService
+	comments *github.IssuesService
 	owner    string
 	repo     string
 	prNumber int
@@ -27,6 +29,7 @@ func createConnector(token, owner, repo string, prNumber int) *connector {
 
 	return &connector{
 		prs:      client.PullRequests,
+		comments: client.Issues,
 		owner:    owner,
 		repo:     repo,
 		prNumber: prNumber,
@@ -37,6 +40,17 @@ func (c *connector) writeReviewComment(block *github.PullRequestComment) error {
 	ctx := context.Background()
 
 	var _, _, err = c.prs.CreateComment(ctx, c.owner, c.repo, c.prNumber, block)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *connector) writeGeneralComment(comment *github.IssueComment) error {
+	ctx := context.Background()
+
+	var _, _, err = c.comments.CreateComment(ctx, c.owner, c.repo, c.prNumber, comment)
 	if err != nil {
 		return err
 	}

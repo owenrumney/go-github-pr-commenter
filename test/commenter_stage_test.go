@@ -1,11 +1,12 @@
 package test
 
 import (
-	"github.com/owenrumney/go-github-pr-commenter/commenter"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/owenrumney/go-github-pr-commenter/commenter"
+	"github.com/stretchr/testify/assert"
 )
 
 type commenterTest struct {
@@ -67,6 +68,11 @@ func (ct *commenterTest) thereIsNoErrors() *commenterTest {
 func (ct *commenterTest) thereIsAnError() *commenterTest {
 	assert.True(ct.t, ct.err != nil)
 	return ct
+}
+
+func (ct *commenterTest) aNewGeneralCommentIsCreated(comment string) {
+	err := ct.commenter.WriteGeneralComment(comment)
+	ct.err = err
 }
 
 func (ct *commenterTest) aSingleLineCommentIsCreated() {
