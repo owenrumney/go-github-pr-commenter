@@ -60,7 +60,7 @@ func Test_can_add_a_single_line_comment(t *testing.T) {
 func Test_add_a_single_line_comment_that_is_on_a_line_that_isnt_in_pr(t *testing.T) {
 	given, when, then := newCommenterTest(t)
 
-	given.thePullRequest(1).
+	given.thePullRequest(5).
 		forOwner("owenrumney").
 		inRepo("go-github-pr-commenter").
 		usingTokenFromEnvironment()
@@ -84,6 +84,20 @@ func Test_add_a_single_line_comment_on_a_file_that_that_isnt_in_pr(t *testing.T)
 		and().aSingleLineCommentIsCreatedThatIsntValidFile()
 	then.thereIsAnError().
 		and().theErrorIsCommentIsInvalid()
+}
+
+func Test_add_a_general_comment(t *testing.T) {
+	given, when, then := newCommenterTest(t)
+
+	given.thePullRequest(1).
+		forOwner("owenrumney").
+		inRepo("go-github-pr-commenter").
+		usingTokenFromEnvironment()
+
+	when.aNewCommenterIsCreated().
+		and().aNewGeneralCommentIsCreated("test comment")
+
+	then.thereIsNoErrors()
 }
 
 func Test_can_add_a_single_line_comment_second_one_has_an_error(t *testing.T) {
