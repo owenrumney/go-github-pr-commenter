@@ -9,6 +9,3 @@ env:
 script:
 - go vet ./...
 - go test -v -covermode=atomic -coverpkg ./commenter/... -coverprofile coverage.txt ./...
-
-after_success:
-  - bash <(curl -s https://codecov.io/bash)
