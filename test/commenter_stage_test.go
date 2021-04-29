@@ -108,12 +108,6 @@ func (ct *commenterTest) theSingleLineCommentWithDuplicateHasBeenWritten() {
 	assert.True(ct.t, checkForComment("commitFileInfo.go", "This is going to be duped", 7))
 }
 
-func (ct *commenterTest) theErrorIsCommentAlreadyWritten() {
-	existError := ct.err.(commenter.CommentAlreadyWrittenError)
-	assert.NotNil(ct.t, existError)
-	assert.Equal(ct.t, ct.err.Error(), "The file [commitFileInfo.go] already has the comment written [This is going to be duped]")
-}
-
 func (ct *commenterTest) theErrorIsCommentIsInvalid() {
 	existError := ct.err.(commenter.CommentNotValidError)
 	assert.NotNil(ct.t, existError)

@@ -100,28 +100,6 @@ func Test_add_a_general_comment(t *testing.T) {
 	then.thereIsNoErrors()
 }
 
-func Test_can_add_a_single_line_comment_second_one_has_an_error(t *testing.T) {
-	given, when, then := newCommenterTest(t)
-
-	given.thePullRequest(1).
-		forOwner("owenrumney").
-		inRepo("go-github-pr-commenter").
-		usingTokenFromEnvironment()
-
-	when.aNewCommenterIsCreated().
-		and().aSingleLineCommentIsCreatedWithDuplicate()
-
-	then.thereIsNoErrors().
-		and().theSingleLineCommentWithDuplicateHasBeenWritten()
-
-	then.aNewCommenterIsCreated().
-		and().aSingleLineCommentIsCreatedWithDuplicate()
-
-	then.thereIsAnError().
-		and().theErrorIsCommentAlreadyWritten()
-
-}
-
 func Test_can_add_a_multi_line_comment(t *testing.T) {
 	given, when, then := newCommenterTest(t)
 
