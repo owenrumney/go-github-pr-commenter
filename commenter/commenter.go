@@ -75,6 +75,7 @@ func (c *Commenter) WriteMultiLineComment(file, comment string, startLine, endLi
 
 	prComment := buildComment(file, comment, endLine, *info)
 	prComment.StartLine = &startLine
+	fmt.Printf("%#v", prComment)
 	return c.writeCommentIfRequired(prComment)
 }
 
