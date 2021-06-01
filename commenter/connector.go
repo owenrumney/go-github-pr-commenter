@@ -2,6 +2,7 @@ package commenter
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/go-github/v32/github"
 	"golang.org/x/oauth2"
@@ -37,7 +38,7 @@ func createConnector(token, owner, repo string, prNumber int) *connector {
 	}
 }
 
-func (c *connector) writeReviewComment(block *github.PullRequestComment, commentId *int64) error {
+func (c *connector) writeReviewComment(block *github.PullRequestComment, commentId *int64, isRetry ...bool) error {
 	ctx := context.Background()
 
 	if commentId != nil {
@@ -46,18 +47,34 @@ func (c *connector) writeReviewComment(block *github.PullRequestComment, comment
 			return err
 		}
 	}
-	var _, _, err = c.prs.CreateComment(ctx, c.owner, c.repo, c.prNumber, block)
+	var _, resp, err = c.prs.CreateComment(ctx, c.owner, c.repo, c.prNumber, block)
 	if err != nil {
+		if resp != nil && resp.StatusCode == 422 {
+			if len(isRetry) == 0 {
+				time.Sleep(1 * time.Second)
+				c.writeReviewComment(block, nil, true)
+			} else {
+				return newAbuseRateLimitError(c.owner, c.repo, c.prNumber, 1)
+			}
+
+		}
 		return err
 	}
 	return nil
 }
 
-func (c *connector) writeGeneralComment(comment *github.IssueComment) error {
+func (c *connector) writeGeneralComment(comment *github.IssueComment, isRetry ...bool) error {
 	ctx := context.Background()
 
-	var _, _, err = c.comments.CreateComment(ctx, c.owner, c.repo, c.prNumber, comment)
+	var _, resp, err = c.comments.CreateComment(ctx, c.owner, c.repo, c.prNumber, comment)
 	if err != nil {
+		if resp != nil && resp.StatusCode == 422 {
+			if len(isRetry) == 0 {
+				time.Sleep(1 * time.Second)
+				c.writeGeneralComment(comment, true)
+			}
+			return newAbuseRateLimitError(c.owner, c.repo, c.prNumber, 1)
+		}
 		return err
 	}
 
