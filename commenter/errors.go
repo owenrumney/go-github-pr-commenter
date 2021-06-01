@@ -21,6 +21,14 @@ type PrDoesNotExistError struct {
 	prNumber int
 }
 
+// AbuseRateLimitError return when the GitHub abuse rate limit is hit
+type AbuseRateLimitError struct {
+	owner            string
+	repo             string
+	prNumber         int
+	BackoffInSeconds int
+}
+
 func newCommentAlreadyWrittenError(filepath, comment string) CommentAlreadyWrittenError {
 	return CommentAlreadyWrittenError{
 		filepath: filepath,
@@ -53,4 +61,17 @@ func newPrDoesNotExistError(c *connector) PrDoesNotExistError {
 
 func (e PrDoesNotExistError) Error() string {
 	return fmt.Sprintf("PR number [%d] not found for %s/%s", e.prNumber, e.owner, e.repo)
+}
+
+func newAbuseRateLimitError(owner, repo string, prNumber, backoffInSeconds int) AbuseRateLimitError {
+	return AbuseRateLimitError{
+		owner:            owner,
+		repo:             repo,
+		prNumber:         prNumber,
+		BackoffInSeconds: backoffInSeconds,
+	}
+}
+
+func (e AbuseRateLimitError) Error() string {
+	return fmt.Sprintf("Abuse limit reached on PR [%d] not found for %s/%s", e.prNumber, e.owner, e.repo)
 }
