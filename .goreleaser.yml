@@ -1,0 +1,15 @@
+# This is an example .goreleaser.yml file with some sane defaults.
+# Make sure to check the documentation at http://goreleaser.com
+before:
+
+release:
+  github:
+    owner: owenrumney
+    name: go-github-pr-commenter
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
