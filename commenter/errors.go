@@ -51,11 +51,11 @@ func (e CommentNotValidError) Error() string {
 	return fmt.Sprintf("There is nothing to comment on at line [%d] in file [%s]", e.lineNo, e.filepath)
 }
 
-func newPrDoesNotExistError(c *connector) PrDoesNotExistError {
+func newPrDoesNotExistError(owner, repo string, prNumber int) PrDoesNotExistError {
 	return PrDoesNotExistError{
-		owner:    c.owner,
-		repo:     c.repo,
-		prNumber: c.prNumber,
+		owner:    owner,
+		repo:     repo,
+		prNumber: prNumber,
 	}
 }
 
