@@ -3,9 +3,10 @@ package commenter
 import (
 	"errors"
 	"fmt"
-	"github.com/google/go-github/v32/github"
 	"regexp"
 	"strconv"
+
+	"github.com/google/go-github/v32/github"
 )
 
 // Commenter is the main commenter struct
@@ -163,11 +164,17 @@ func buildComment(file, comment string, line int, info commitFileInfo) *github.P
 func getCommitInfo(file *github.CommitFile) (*commitFileInfo, error) {
 
 	groups := patchRegex.FindAllStringSubmatch(file.GetPatch(), -1)
+	var hunkStart, hunkEnd int
 	if len(groups) < 1 {
-		return nil, errors.New("the patch details could not be resolved")
+		if file.GetChanges() >= 1 {
+			hunkStart, hunkEnd = 1, 1
+		} else {
+			return nil, errors.New("the patch details could not be resolved")
+		}
+	} else {
+		hunkStart, _ = strconv.Atoi(groups[0][1])
+		hunkEnd, _ = strconv.Atoi(groups[0][2])
 	}
-	hunkStart, _ := strconv.Atoi(groups[0][1])
-	hunkEnd, _ := strconv.Atoi(groups[0][2])
 
 	shaGroups := commitRefRegex.FindAllStringSubmatch(file.GetContentsURL(), -1)
 	if len(shaGroups) < 1 {
