@@ -3,9 +3,10 @@ package commenter
 import (
 	"errors"
 	"fmt"
-	"github.com/google/go-github/v32/github"
 	"regexp"
 	"strconv"
+
+	"github.com/google/go-github/v32/github"
 )
 
 // Commenter is the main commenter struct
@@ -28,6 +29,34 @@ func NewCommenter(token, owner, repo string, prNumber int) (*Commenter, error) {
 	}
 
 	ghConnector, err := createConnector(token, owner, repo, prNumber)
+	if err != nil {
+		return nil, err
+	}
+
+	commitFileInfos, existingComments, err := loadPr(ghConnector)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Commenter{
+		ghConnector:      ghConnector,
+		existingComments: existingComments,
+		files:            commitFileInfos,
+	}, nil
+}
+
+// NewEnterpriseCommenter creates a Commenter for updating PR with comments in an Enterprise Github Server
+func NewEnterpriseCommenter(token, baseUrl, uploadUrl, owner, repo string, prNumber int) (*Commenter, error) {
+
+	if len(token) == 0 {
+		return nil, errors.New("the GITHUB_TOKEN has not been set")
+	}
+
+	if len(baseUrl) == 0 {
+		return nil, errors.New("the baseUrl has not been set")
+	}
+
+	ghConnector, err := createEnterpriseConnector(token, baseUrl, uploadUrl, owner, repo, prNumber)
 	if err != nil {
 		return nil, err
 	}
