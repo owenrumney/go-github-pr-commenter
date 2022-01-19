@@ -92,7 +92,9 @@ func (c *connector) writeReviewComment(block *github.PullRequestComment, comment
 	ctx := context.Background()
 	if commentId != nil {
 		return writeCommentWithRetries(c.owner, c.repo, c.prNumber, func() (*github.Response, error) {
-			_, resp, err := c.prs.EditComment(ctx, c.owner, c.repo, *commentId, block)
+			_, resp, err := c.prs.EditComment(ctx, c.owner, c.repo, *commentId, &github.PullRequestComment{
+				Body: block.Body,
+			})
 			return resp, err
 		})
 	}
