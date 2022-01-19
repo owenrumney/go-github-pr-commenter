@@ -81,7 +81,7 @@ func newEnterpriseGithubClient(token, baseUrl, uploadUrl string) (*github.Client
 
 	client, err := github.NewEnterpriseClient(baseUrl, uploadUrl, tc)
 	if err != nil {
-	return nil, err
+		return nil, err
 	}
 
 	return client, nil
@@ -91,16 +91,16 @@ func (c *connector) writeReviewComment(block *github.PullRequestComment, comment
 
 	ctx := context.Background()
 	if commentId != nil {
-		if _, err := c.prs.DeleteComment(ctx, c.owner, c.repo, *commentId); err != nil {
-			return fmt.Errorf("delete existing comment %d: %w", *commentId, err)
-		}
+		return writeCommentWithRetries(c.owner, c.repo, c.prNumber, func() (*github.Response, error) {
+			_, resp, err := c.prs.EditComment(ctx, c.owner, c.repo, *commentId, block)
+			return resp, err
+		})
 	}
 
-	writeReviewCommentFn := func() (*github.Response, error) {
+	return writeCommentWithRetries(c.owner, c.repo, c.prNumber, func() (*github.Response, error) {
 		_, resp, err := c.prs.CreateComment(ctx, c.owner, c.repo, c.prNumber, block)
 		return resp, err
-	}
-	return writeCommentWithRetries(c.owner, c.repo, c.prNumber, writeReviewCommentFn)
+	})
 }
 
 func (c *connector) writeGeneralComment(comment *github.IssueComment) error {
