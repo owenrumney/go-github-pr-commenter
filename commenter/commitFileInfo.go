@@ -7,10 +7,18 @@ import (
 
 type commitFileInfo struct {
 	FileName     string
-	hunkStart    int
-	hunkEnd      int
+	hunkInfos    []*hunkInfo
 	sha          string
 	likelyBinary bool
+}
+
+type hunkInfo struct {
+	hunkStart int
+	hunkEnd   int
+}
+
+func (hi hunkInfo) isLineInHunk(line int) bool {
+	return line >= hi.hunkStart && line <= hi.hunkEnd
 }
 
 func getCommitFileInfo(ghConnector *connector) ([]*commitFileInfo, error) {
@@ -39,8 +47,22 @@ func getCommitFileInfo(ghConnector *connector) ([]*commitFileInfo, error) {
 	return commitFileInfos, nil
 }
 
+func (cfi *commitFileInfo) getHunkInfo(line int) *hunkInfo {
+	for _, hunkInfo := range cfi.hunkInfos {
+		if hunkInfo.isLineInHunk(line) {
+			return hunkInfo
+		}
+	}
+	return nil
+}
+
+func (cfi *commitFileInfo) isLineInChange(line int) bool {
+	return cfi.getHunkInfo(line) != nil
+}
+
 func (cfi commitFileInfo) calculatePosition(line int) *int {
-	position := line - cfi.hunkStart
+	hi := cfi.getHunkInfo(line)
+	position := line - hi.hunkStart
 	return &position
 }
 
@@ -49,5 +71,5 @@ func (cfi commitFileInfo) isBinary() bool {
 }
 
 func (cfi commitFileInfo) isResolvable() bool {
-	return cfi.isBinary() && cfi.hunkStart != -1 && cfi.hunkEnd != -1
+	return cfi.isBinary() && len(cfi.hunkInfos) == 0
 }

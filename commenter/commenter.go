@@ -157,7 +157,7 @@ func (c *Commenter) checkCommentRelevant(filename string, line int) bool {
 	for _, file := range c.files {
 		if relevant := func(file *commitFileInfo) bool {
 			if file.FileName == filename && !file.isResolvable() {
-				if line >= file.hunkStart && line <= file.hunkEnd {
+				if file.isLineInChange(line) {
 					return true
 				}
 			}
@@ -173,7 +173,7 @@ func (c *Commenter) getFileInfo(file string, line int) (*commitFileInfo, error) 
 
 	for _, info := range c.files {
 		if info.FileName == file && !info.isResolvable() {
-			if line >= info.hunkStart && line <= info.hunkEnd {
+			if info.isLineInChange(line) {
 				return info, nil
 			}
 		}
@@ -195,7 +195,7 @@ func buildComment(file, comment string, line int, info commitFileInfo) *github.P
 func getCommitInfo(file *github.CommitFile) (cfi *commitFileInfo, err error) {
 	var isBinary bool
 	patch := file.GetPatch()
-	hunkStart, hunkEnd, err := parseHunkPositions(patch, *file.Filename)
+	hunkInfos, err := parseHunkPositions(patch, *file.Filename)
 	if err != nil {
 		return nil, err
 	}
@@ -208,34 +208,39 @@ func getCommitInfo(file *github.CommitFile) (cfi *commitFileInfo, err error) {
 
 	return &commitFileInfo{
 		FileName:     *file.Filename,
-		hunkStart:    hunkStart,
-		hunkEnd:      hunkStart + (hunkEnd - 1),
+		hunkInfos:    hunkInfos,
 		sha:          sha,
 		likelyBinary: isBinary,
 	}, nil
 }
 
-func parseHunkPositions(patch, filename string) (hunkStart int, hunkEnd int, err error) {
+func parseHunkPositions(patch, filename string) (hi []*hunkInfo, err error) {
+	hunkInfos := make([]*hunkInfo, 0)
 	if patch != "" {
 		groups := patchRegex.FindAllStringSubmatch(patch, -1)
 		if len(groups) < 1 {
-			return 0, 0, fmt.Errorf("the patch details for [%s] could not be resolved", filename)
+			return hunkInfos, fmt.Errorf("the patch details for [%s] could not be resolved", filename)
 		}
+		for _, patchGroup := range groups {
+			patchGroup = groups[0]
+			endPos := 2
+			if len(patchGroup) > 2 && patchGroup[2] == "" {
+				endPos = 1
+			}
 
-		patchGroup := groups[0]
-		endPos := 2
-		if len(patchGroup) > 2 && patchGroup[2] == "" {
-			endPos = 1
-		}
-
-		hunkStart, err = strconv.Atoi(patchGroup[1])
-		if err != nil {
-			hunkStart = -1
-		}
-		hunkEnd, err = strconv.Atoi(patchGroup[endPos])
-		if err != nil {
-			hunkEnd = -1
+			hunkStart, err := strconv.Atoi(patchGroup[1])
+			if err != nil {
+				hunkStart = -1
+			}
+			hunkEnd, err := strconv.Atoi(patchGroup[endPos])
+			if err != nil {
+				hunkEnd = -1
+			}
+			hunkInfos = append(hunkInfos, &hunkInfo{
+				hunkStart: hunkStart,
+				hunkEnd:   hunkEnd,
+			})
 		}
 	}
-	return hunkStart, hunkEnd, nil
+	return hunkInfos, nil
 }
