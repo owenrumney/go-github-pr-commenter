@@ -47,7 +47,7 @@ import (
 
 
 // Create the commenter
-token := os.Getenv("GITHUB_TOKEN")
+var token = os.Getenv("GITHUB_TOKEN")
 
 c, err := commenter.NewCommenter(token, "tfsec", "tfsec-example-project", 8)
 if err != nil {
