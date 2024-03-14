@@ -18,7 +18,7 @@ type hunkInfo struct {
 }
 
 func (hi hunkInfo) isLineInHunk(line int) bool {
-	return line >= hi.hunkStart && line <= hi.hunkEnd
+	return line >= hi.hunkStart && line <= hi.hunkStart + hi.hunkEnd
 }
 
 func getCommitFileInfo(ghConnector *connector) ([]*commitFileInfo, error) {
